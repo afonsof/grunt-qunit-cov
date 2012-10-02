@@ -40,6 +40,9 @@ This is similar to the built-in `qunit` task, though the configuration is differ
 }
 ```
 `minimum` specifies the minimum coverage of all files to task pass, `srcDir` the directory to be instrumented by jscoverage and copied to `outDir`, `depDirs` the dependencies directory list will be copied to `outDir` and `testFiles` parameter is a list of all files to be tested with qunit.
+
+After running there will be a folder called `out` inside the `outDir` specified with coverage.html, which contains the summary of execution and other files of the `srcDir`.
+
 ## Contributing
 
 Please use the issue tracker and pull requests.
