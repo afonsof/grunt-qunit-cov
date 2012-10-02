@@ -4,7 +4,7 @@
   "version": "0.2.1",
   "homepage": "https://github.com/afonsof/grunt-qunit-cov",
   "author": {
-    "name": "Afonso França",
+    "name": "Afonso Franï¿½a",
     "email": "afonso.franca@gmail.com"
   },
   "repository": {
@@ -30,9 +30,11 @@
   "dependencies": {
     "grunt": "~0.3.4"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "keywords": [
     "gruntplugin"
-  ]
+  ],
+  "readme": "ERROR: No README.md file found!",
+  "_id": "grunt-qunit-cov@0.2.1",
+  "_from": "grunt-qunit-cov@>=0.2.0"
 }
