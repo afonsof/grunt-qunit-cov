@@ -1,6 +1,6 @@
 # grunt-qunit-cov
 
-[Grunt](https://github.com/cowboy/grunt) plugin for qunit unit test with coverage
+[Grunt](https://github.com/gruntjs/grunt) plugin for qunit unit test with coverage
 
 ## Getting Started
 
@@ -21,7 +21,7 @@ grunt.loadNpmTasks('grunt-qunit-cov');
 
 This plugin provides one task: `qunit-cov`. It's [multi tasks][types_of_tasks], meaning that grunt will automatically iterate over all `qunit-cov` targets if a target is not specified.
 
-[types_of_tasks]: https://github.com/cowboy/grunt/blob/master/docs/types_of_tasks.md
+[types_of_tasks]: https://github.com/gruntjs/grunt/blob/master/docs/types_of_tasks.md
 
 ### qunit-cov
 
