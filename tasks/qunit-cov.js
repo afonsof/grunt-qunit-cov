@@ -10,6 +10,7 @@
  // Nodejs libs.
 var fs = require('fs');
 var path = require('path');
+var wrench = require('wrench');
 
 module.exports = function(grunt)
 {
@@ -180,7 +181,7 @@ module.exports = function(grunt)
         
         if(fs.existsSync(outDir))
         {
-            rmdirSyncRecursive(outDir);
+            wrench.rmdirSyncRecursive(outDir);
         }
         if(!fs.existsSync(outDir))
         {
@@ -197,8 +198,9 @@ module.exports = function(grunt)
         for(var i = 0; i < depDirs.length; i++)
         {
             var dir = depDirs[i];
-            grunt.verbose.writeln('Copy dir ' + dir + ' to ' + outDir + '/in/' + dir);            
-            copyDirSyncRecursive(dir, outDir + '/in/' + dir);
+            grunt.verbose.writeln('Copy dir ' + dir + ' to ' + outDir + '/in/' + dir);
+            wrench.mkdirSyncRecursive(outDir + '/in/' + dir);
+            wrench.copyDirSyncRecursive(dir, outDir + '/in/' + dir, {preserve: true});
         }
     
         grunt.log.write('Instrumenting folder \'' + srcDir + '\' to ' + outDir + '/in/' + srcDir + '...');
@@ -532,240 +534,6 @@ module.exports = function(grunt)
         return '<tr><td width="150"><table width="100%" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td width="' + percent + '%" bgcolor="#00CC33">&nbsp;</td><td width=" '+ 100 + percent + '%" bgcolor="#990000"></td></tr></tbody></table></td><td width="25" align="right"><strong>' + percent+ '%</strong></td><td>' + link + '</td></tr>';
     }
 
-    /*  wrench.readdirSyncRecursive("directory_path");
-     *
-     *  Recursively dives through directories and read the contents of all the
-     *  children directories.
-     */
-    function readdirSyncRecursive(baseDir) {
-        baseDir = baseDir.replace(/\/$/, '');
 
-        var readdirSyncRecursive = function(baseDir) {
-            var files = [],
-                curFiles,
-                nextDirs,
-                isDir = function(fname){
-                    return fs.statSync( _path.join(baseDir, fname) ).isDirectory();
-                },
-                prependBaseDir = function(fname){
-                    return _path.join(baseDir, fname);
-                };
 
-            curFiles = fs.readdirSync(baseDir);
-            nextDirs = curFiles.filter(isDir);
-            curFiles = curFiles.map(prependBaseDir);
-
-            files = files.concat( curFiles );
-
-            while (nextDirs.length) {
-                files = files.concat( readdirSyncRecursive( _path.join(baseDir, nextDirs.shift()) ) );
-            }
-
-            return files;
-        };
-
-        // convert absolute paths to relative
-        var fileList = readdirSyncRecursive(baseDir).map(function(val){
-            return _path.relative(baseDir, val);
-        });
-
-        return fileList;
-    }
-
-    /*  wrench.readdirRecursive("directory_path", function(error, files) {});
-     *
-     *  Recursively dives through directories and read the contents of all the
-     *  children directories.
-     *
-     *  Asynchronous, so returns results/error in callback.
-     *  Callback receives the of files in currently recursed directory.
-     *  When no more directories are left, callback is called with null for all arguments.
-     *
-     */
-    function readdirRecursive(baseDir, fn)
-    {
-        baseDir = baseDir.replace(/\/$/, '');
-
-        var waitCount = 0;
-
-        function readdirRecursive(curDir) {
-            var files = [],
-                curFiles,
-                nextDirs,
-                prependcurDir = function(fname){
-                    return _path.join(curDir, fname);
-                };
-
-            waitCount++;
-            fs.readdir(curDir, function(e, curFiles) {
-                waitCount--;
-
-                curFiles = curFiles.map(prependcurDir);
-
-                curFiles.forEach(function(it) {
-                    waitCount++;
-
-                    fs.stat(it, function(e, stat) {
-                        waitCount--;
-
-                        if (e) {
-                            fn(e);
-                        } else {
-                            if (stat.isDirectory()) {
-                                readdirRecursive(it);
-                            }
-                        }
-
-                        if (waitCount == 0) {
-                            fn(null, null);
-                        }
-                    });
-                });
-
-                fn(null, curFiles.map(function(val) {
-                    // convert absolute paths to relative
-                    return _path.relative(baseDir, val);
-                }));
-
-                if (waitCount == 0) {
-                    fn(null, null);
-                }
-            });
-        };
-
-        readdirRecursive(baseDir);
-    }
-
-    /*  wrench.rmdirSyncRecursive("directory_path", forceDelete, failSilent);
-     *
-     *  Recursively dives through directories and obliterates everything about it. This is a
-     *  Sync-function, which blocks things until it's done. No idea why anybody would want an
-     *  Asynchronous version. :\
-     */
-    function rmdirSyncRecursive(path, failSilent)
-    {
-        var files;
-
-        try {
-            files = fs.readdirSync(path);
-        } catch (err) {
-            if(failSilent) return;
-            throw new Error(err.message);
-        }
-
-        /*  Loop through and delete everything in the sub-tree after checking it */
-        for(var i = 0; i < files.length; i++) {
-            var currFile = fs.lstatSync(path + "/" + files[i]);
-
-            if(currFile.isDirectory()) // Recursive function back to the beginning
-                rmdirSyncRecursive(path + "/" + files[i]);
-
-            else if(currFile.isSymbolicLink()) // Unlink symlinks
-                fs.unlinkSync(path + "/" + files[i]);
-
-            else // Assume it's a file - perhaps a try/catch belongs here?
-                fs.unlinkSync(path + "/" + files[i]);
-        }
-
-        /*  Now that we know everything in the sub-tree has been deleted, we can delete the main
-            directory. Huzzah for the shopkeep. */
-        return fs.rmdirSync(path);
-    }
-
-    /*  wrench.copyDirSyncRecursive("directory_to_copy", "new_directory_location", opts);
-     *
-     *  Recursively dives through a directory and moves all its files to a new location. This is a
-     *  Synchronous function, which blocks things until it's done. If you need/want to do this in
-     *  an Asynchronous manner, look at wrench.copyDirRecursively() below.
-     *
-     *  Note: Directories should be passed to this function without a trailing slash.
-     */
-    function copyDirSyncRecursive(sourceDir, newDirLocation, opts)
-    {
-
-        if (!opts || !opts.preserve) {
-            try {
-                if(fs.statSync(newDirLocation).isDirectory()) rmdirSyncRecursive(newDirLocation);
-            } catch(e) { }
-        }
-
-        /*  Create the directory where all our junk is moving to; read the mode of the source directory and mirror it */
-        var checkDir = fs.statSync(sourceDir);
-        try {
-            fs.mkdirSync(newDirLocation, checkDir.mode);
-        } catch (e) {
-            //if the directory already exists, that's okay
-            if (e.code !== 'EEXIST') throw e;
-        }
-
-        var files = fs.readdirSync(sourceDir);
-
-        for(var i = 0; i < files.length; i++) {
-            var currFile = fs.lstatSync(sourceDir + "/" + files[i]);
-
-            if(currFile.isDirectory()) {
-                /*  recursion this thing right on back. */
-                copyDirSyncRecursive(sourceDir + "/" + files[i], newDirLocation + "/" + files[i], opts);
-            } else if(currFile.isSymbolicLink()) {
-                var symlinkFull = fs.readlinkSync(sourceDir + "/" + files[i]);
-                fs.symlinkSync(symlinkFull, newDirLocation + "/" + files[i]);
-            } else {
-                /*  At this point, we've hit a file actually worth copying... so copy it on over. */
-                var contents = fs.readFileSync(sourceDir + "/" + files[i]);
-                fs.writeFileSync(newDirLocation + "/" + files[i], contents);
-            }
-        }
-    }
-
-    /*  wrench.chmodSyncRecursive("directory", filemode);
-     *
-     *  Recursively dives through a directory and chmods everything to the desired mode. This is a
-     *  Synchronous function, which blocks things until it's done.
-     *
-     *  Note: Directories should be passed to this function without a trailing slash.
-     */
-    function chmodSyncRecursive(sourceDir, filemode) {
-        var files = fs.readdirSync(sourceDir);
-
-        for(var i = 0; i < files.length; i++) {
-            var currFile = fs.lstatSync(sourceDir + "/" + files[i]);
-
-            if(currFile.isDirectory()) {
-                /*  ...and recursion this thing right on back. */
-                chmodSyncRecursive(sourceDir + "/" + files[i], filemode);
-            } else {
-                /*  At this point, we've hit a file actually worth copying... so copy it on over. */
-                fs.chmod(sourceDir + "/" + files[i], filemode);
-            }
-        }
-
-        /*  Finally, chmod the parent directory */
-        fs.chmod(sourceDir, filemode);
-    }
-
-    /*  wrench.chownSyncRecursive("directory", uid, gid);
-     *
-     *  Recursively dives through a directory and chowns everything to the desired user and group. This is a
-     *  Synchronous function, which blocks things until it's done.
-     *
-     *  Note: Directories should be passed to this function without a trailing slash.
-     */
-    function chownSyncRecursive(sourceDir, uid, gid) {
-        var files = fs.readdirSync(sourceDir);
-
-        for(var i = 0; i < files.length; i++) {
-            var currFile = fs.lstatSync(sourceDir + "/" + files[i]);
-
-            if(currFile.isDirectory()) {
-                /*  ...and recursion this thing right on back. */
-                chownSyncRecursive(sourceDir + "/" + files[i], uid, gid);
-            } else {
-                /*  At this point, we've hit a file actually worth chowning... so own it. */
-                fs.chownSync(sourceDir + "/" + files[i], uid, gid);
-            }
-        }
-
-        /*  Finally, chown the parent directory */
-        fs.chownSync(sourceDir, uid, gid);
-    }
 }
