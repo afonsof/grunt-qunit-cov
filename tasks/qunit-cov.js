@@ -21,6 +21,14 @@ module.exports = function(grunt)
     // Keep track of the last-started test(s).
     var unfinished = {};
 
+    // Internal lib.
+    var jscoverage = require('./lib/jscoverage').init(grunt).jscoverage;
+    var phantomjs = require('./lib/phantomjs').init(grunt).phantomjs;
+
+    function getFile(localPath) {
+        return path.join(__dirname, localPath);
+    }
+
     // Allow an error message to retain its color when split across multiple lines.
     function formatMessage(str)
     {
@@ -205,7 +213,7 @@ module.exports = function(grunt)
     
         grunt.log.write('Instrumenting folder \'' + srcDir + '\' to ' + outDir + '/in/' + srcDir + '...');
             
-        grunt.helper('jscoverage',
+        jscoverage(
         {
             code: 90,
             args: [
@@ -220,7 +228,7 @@ module.exports = function(grunt)
                 var urls = grunt.file.expandFileURLs(outDir + '/in/' + testFiles);
 
                 // Process each filepath in-order.
-                grunt.utils.async.forEachSeries(urls, function(url, next)
+                grunt.util.async.forEachSeries(urls, function(url, next)
                 {
                     var basename = path.basename(url);
                     grunt.verbose.subhead('Testing ' + basename).or.write('Testing ' + basename);
@@ -291,15 +299,15 @@ module.exports = function(grunt)
                     }());
                     
                     // Launch PhantomJS.
-                    grunt.helper('phantomjs',
+                    phantomjs(
                     {
                         code: 90,
                         args: [
-                                grunt.task.getFile('qunit-cov/phantom.js'),
+                                getFile('qunit-cov/phantom.js'),
                                 tempfile,
-                                grunt.task.getFile('qunit-cov/qunit.js'),
+                                getFile('qunit-cov/qunit.js'),
                                 url,
-                                '--config=' + grunt.task.getFile('qunit-cov/phantom.json')
+                                '--config=' + getFile('qunit-cov/phantom.json')
                             ],
                         done: function(err)
                         {
@@ -339,83 +347,10 @@ module.exports = function(grunt)
     // HELPERS
     // ==========================================================================
 
-    grunt.registerHelper('phantomjs', function(options)
-    {
-        return grunt.utils.spawn(
-        {
-            cmd: 'phantomjs',
-            args: options.args
-        },
-
-        function(err, result, code)
-        {
-            if (!err)
-            {
-                return options.done(null); 
-            }
-            // Something went horribly wrong.
-            grunt.verbose.or.writeln();
-            grunt.log.write('Running PhantomJS...').error();
-            if (code === 127)
-            {
-                grunt.log.errorlns(
-                    'In order for this task to work properly, PhantomJS must be ' +
-                    'installed and in the system PATH (if you can run "phantomjs" at' +
-                    ' the command line, this task should work). Unfortunately, ' +
-                    'PhantomJS cannot be installed automatically via npm or grunt. ' +
-                    'See the grunt FAQ for PhantomJS installation instructions: ' +
-                    'https://github.com/cowboy/grunt/blob/master/docs/faq.md'
-                );
-                grunt.warn('PhantomJS not found.', options.code);
-            }
-            else 
-            {
-                result.split('\n').forEach(grunt.log.error, grunt.log);
-                grunt.warn('PhantomJS exited unexpectedly with exit code ' + code + '.', options.code);
-            }
-            options.done(code);
-        });
-    });
-    
-    grunt.registerHelper('jscoverage', function(options)
-    {
-        return grunt.utils.spawn(
-        {
-            cmd: 'jscoverage',
-            args: options.args
-        },
-
-        function(err, result, code)
-        {
-            if (!err)
-            {
-                return options.done(null); 
-            }
-            // Something went horribly wrong.
-            grunt.verbose.or.writeln();
-            grunt.log.write('Running JsCoverage...').error();
-            if (code === 127)
-            {
-                grunt.log.errorlns(
-                    'In order for this task to work properly, JsCoverage must be ' +
-                    'installed and in the system PATH (if you can run "jscoverage" at' +
-                    ' the command line, this task should work)'
-                );
-                grunt.warn('JsCoverage not found.', options.code);
-            }
-            else 
-            {
-                result.split('\n').forEach(grunt.log.error, grunt.log);
-                grunt.warn('JsCoverage exited unexpectedly with exit code ' + code + '.', options.code);
-            }
-            options.done(code);
-        });
-    });
-    
     function PrintCoverage(coverageInfo, minimum, srcDir, outDir)
     {
         var totalCovered = 0, totalUncovered = 0;
-        var coverageBase = grunt.file.read(grunt.task.getFile('qunit-cov/cov.tmpl')).toString();
+        var coverageBase = grunt.file.read(getFile('qunit-cov/cov.tmpl')).toString();
         
         var filesCoverage = {};        
         
