@@ -3,3 +3,4 @@ cov
 .idea
 jscoverage.exe
 phantomjs.exe
+/npm-debug.log
