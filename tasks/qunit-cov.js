@@ -225,7 +225,7 @@ module.exports = function(grunt)
                 grunt.log.ok();
                
                 // Get files as URLs.
-                var urls = grunt.file.expandFileURLs(outDir + '/in/' + testFiles);
+                var urls = grunt.file.expand(outDir + '/in/' + testFiles);
 
                 // Process each filepath in-order.
                 grunt.util.async.forEachSeries(urls, function(url, next)
@@ -354,7 +354,7 @@ module.exports = function(grunt)
         
         var filesCoverage = {};        
         
-        var files = grunt.file.expandFiles(srcDir + '/**/*.js');
+        var files = grunt.file.expand(srcDir + '/**/*.js');
             
         for(var i=0; i < files.length; i++)
         {
