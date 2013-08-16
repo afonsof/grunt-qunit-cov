@@ -15,6 +15,7 @@ var wrench = require('wrench');
 module.exports = function(grunt)
 {
     var status = {failed: 0, passed: 0, total: 0, duration: 0, coverage: {}};
+    var utils = grunt.util || grunt.utils;
 
     // Keep track of the last-started module, test and status.
     var currentModule, currentTest;
@@ -185,6 +186,7 @@ module.exports = function(grunt)
         depDirs = this.data.depDirs;
         testFiles = this.data.testFiles;
         baseDir = this.data.baseDir;
+		encoding = this.data.encoding;
         // Reset status.
         
         if(fs.existsSync(outDir))
@@ -218,7 +220,8 @@ module.exports = function(grunt)
             code: 90,
             args: [
                     srcDir,
-                    outDir + '/in/' + srcDir
+                    outDir + '/in/' + srcDir,
+					"--encoding="+encoding
                 ],
             done: function(err)
             {
@@ -228,7 +231,7 @@ module.exports = function(grunt)
                 var urls = grunt.file.expand(outDir + '/in/' + testFiles);
 
                 // Process each filepath in-order.
-                grunt.util.async.forEachSeries(urls, function(url, next)
+                utils.async.forEachSeries(urls, function(url, next)
                 {
                     var basename = path.basename(url);
                     grunt.verbose.subhead('Testing ' + basename).or.write('Testing ' + basename);
