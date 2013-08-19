@@ -1,7 +1,7 @@
 {
   "name": "grunt-qunit-cov",
   "description": "Grunt plugin for qunit unit test with coverage",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "homepage": "https://github.com/afonsof/grunt-qunit-cov",
   "author": {
     "name": "Afonso Franca",
