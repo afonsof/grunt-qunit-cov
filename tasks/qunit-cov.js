@@ -186,7 +186,7 @@ module.exports = function(grunt)
         depDirs = this.data.depDirs;
         testFiles = this.data.testFiles;
         baseDir = this.data.baseDir;
-		encoding = this.data.encoding;
+        encoding = this.data.encoding ? this.data.encoding : "ISO 8859-1";
         // Reset status.
         
         if(fs.existsSync(outDir))
