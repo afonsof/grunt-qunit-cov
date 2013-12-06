@@ -20,7 +20,7 @@
       "url": "https://github.com/afonsof/grunt-qunit-cov/blob/master/MIT-LICENSE"
     }
   ],
-  "main": "tasks/grunt-qunit-cov",
+  "main": "tasks/qunit-cov",
   "engines": {
     "node": ">=0.6.0"
   },
