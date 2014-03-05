@@ -363,8 +363,8 @@ module.exports = function(grunt)
         {
             var file = files[i];
             //FIX coverageInfo literal Object Key is srcDir + fileName
-            var relativeFile = file;
             //var relativeFile = file.substr(srcDir.length + 1);
+            var relativeFile = file;
 
             grunt.log.writeln('reading ' + file);
 
