@@ -29,9 +29,8 @@ This is similar to the built-in `qunit` task, though the configuration is differ
 
 ```js
 "qunit-cov": {
-  test:
-  {
-    minimum: 0.9,
+  test: {
+    minimum: 0.9, 
     srcDir: 'src',
     depDirs: ['3rd', 'test', 'css'],
     outDir: 'testResults',
