@@ -49,3 +49,7 @@ Please use the issue tracker and pull requests.
 ## License
 Copyright (c) 2012 Afonso França
 Licensed under the MIT license.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/afonsof/grunt-qunit-cov/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
